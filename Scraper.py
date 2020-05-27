@@ -1,14 +1,8 @@
 import bs4 as bs
-import urllib.request
-import requests
-import pickle
-from bs4 import BeautifulSoup
 import pandas as pd
 import time
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
-import nltk
-from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
@@ -28,64 +22,49 @@ class Scraper_Features:
         This class returns a df that contains Code (movie URL) and Tags (obtained from movie description+Netflix tags).
         Dump the identified tags in a pickled file.
         The pickled file will make the comparison between tags and word in input much faster."""
-        con = self.engine.connect()
         df_urls = pd.read_sql_query('select * from "URLS"', con = self.engine)
-        df_features = pd.DataFrame()
         LOAD_MORE_BUTTON_XPATH = '//*[@id="vCampaignRouterContent"]/div[2]/div/div[2]/button'
 
-        #//*[@id="vCampaignRouterContent"]/div[2]/div/div[2]/button
-        #//*[@id="vCampaignRouterContent"]/div[2]/div/div[2]/button
         vec = TfidfVectorizer()
-        stop_words = set(stopwords.words('english'))
-        urls = []
         count = 0
         url_analysis=[]
+        driver = webdriver.Chrome(ChromeDriverManager().install())
+        collected_percentage = []
         for url in df_urls["URL"]:
             count = count + 1
-            print(count, url)
+            driver.get(url)
 
-            if count < 5:
+            collected_percentage.append(df_urls["collected_percentage"][count])
+            while True:
+                try:
+                    loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
+                    time.sleep(2)
+                    loadMoreButton.click()
+                    time.sleep(5)
+                    soup = bs.BeautifulSoup(driver.page_source, "html.parser")
 
-                driver = webdriver.Chrome(ChromeDriverManager().install())
-                driver.get(url)
-                urls.append(url)
+                    for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
+
+                        span = a.text
+                    for a in soup.find_all('div', {'class': "routerContentStory-storyBody"}):
+
+                        div = a.text
+                    url_analysis.append(span+' '+div)
+                    vec.fit(url_analysis)
+                    df_features = pd.DataFrame(vec.transform(url_analysis).toarray(),
+                                               columns=sorted(vec.vocabulary_.keys()))
+                    df_features["collected_percentage"] = collected_percentage
+                    df_features["collected_percentage"] = df_features["collected_percentage"].str[:-1]
+                    df_features.to_sql('ML_SET', self.engine, if_exists='replace')
 
 
-
-                while True:
-                    try:
-                        text_analyze = []
-                        loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
-                        time.sleep(2)
-                        loadMoreButton.click()
-                        time.sleep(5)
-                        soup = bs.BeautifulSoup(driver.page_source, "html.parser")
-
-                        for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
-                            for word in a.text.split():
-                                if word not in stop_words and word.isalpha():
-                                    word_lower = word.lower()
-                                    text_analyze.append(word_lower)
-                        for a in soup.find_all('div', {'class': "routerContentStory-storyBody"}):
-                            for word in a.text.split():
-                                if word not in stop_words and word.isalpha():
-                                    word_lower = word.lower()
-                                    text_analyze.append(word_lower)
-                        print(text_analyze)
-
-                        url_analysis.append(text_analyze)
-                        print(url_analysis)
-                        vec.fit(url_analysis)
-
-                        df_features = pd.DataFrame(vec.transform(text_analyze).toarray(), columns=sorted(vec.vocabulary_.keys()))
+                    print(df_features)
 
 
 
 
-                    except Exception as e:
-                        print(e)
-                        break
-            else:
-                break
-        print(len(urls))
-        print(df_features)
+                except Exception as e:
+                    print(e)
+                    break
+
+

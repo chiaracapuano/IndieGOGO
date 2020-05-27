@@ -13,9 +13,9 @@ class Extractor:
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
         df = pd.DataFrame()
         con = self.engine.connect()
-        con.execute('drop table if exists URLS')
 
         con.execute('alter table if exists URLS rename to URLS_OLD')
+
         con.execute(
             'create table URLS ( URL varchar not null, category_name varchar, collected_percentage varchar)')
 

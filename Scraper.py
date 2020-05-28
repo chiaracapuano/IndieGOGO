@@ -3,9 +3,9 @@ import pandas as pd
 import time
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-
+from collections import Counter
+import nltk
+nltk.download('averaged_perceptron_tagger')
 
 
 class Scraper_Features:
@@ -25,16 +25,15 @@ class Scraper_Features:
         df_urls = pd.read_sql_query('select * from "URLS"', con = self.engine)
         LOAD_MORE_BUTTON_XPATH = '//*[@id="vCampaignRouterContent"]/div[2]/div/div[2]/button'
 
-        vec = TfidfVectorizer()
         count = 0
-        url_analysis=[]
         driver = webdriver.Chrome(ChromeDriverManager().install())
-        collected_percentage = []
+        df_append = []
         for url in df_urls["URL"]:
             count = count + 1
             driver.get(url)
-
-            collected_percentage.append(df_urls["collected_percentage"][count])
+            print(url)
+            collected_percentage = df_urls["collected_percentage"][count]
+            print(collected_percentage)
             while True:
                 try:
                     loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
@@ -46,25 +45,36 @@ class Scraper_Features:
                     for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
 
                         span = a.text
+
+
+
+                        lower_case = span.lower()
+                        tokens = nltk.word_tokenize(lower_case)
+                        tags = nltk.pos_tag(tokens)
+                        counts_span = Counter(tag for word, tag in tags if tag.isalpha())
+
                     for a in soup.find_all('div', {'class': "routerContentStory-storyBody"}):
 
                         div = a.text
-                    url_analysis.append(span+' '+div)
-                    vec.fit(url_analysis)
-                    df_features = pd.DataFrame(vec.transform(url_analysis).toarray(),
-                                               columns=sorted(vec.vocabulary_.keys()))
-                    df_features["collected_percentage"] = collected_percentage
-                    df_features["collected_percentage"] = df_features["collected_percentage"].str[:-1]
-                    df_features.to_sql('ML_SET', self.engine, if_exists='replace')
+                        lower_case = div.lower()
+                        tokens = nltk.word_tokenize(lower_case)
+                        tags = nltk.pos_tag(tokens)
+                        counts_div = Counter(tag for word, tag in tags if tag.isalpha())
 
-
-                    print(df_features)
-
-
-
-
+                    counts_tot =   counts_span+counts_div
+                    temp = pd.DataFrame.from_dict(counts_tot, orient='index').reset_index()
+                    temp_nltk = pd.DataFrame([temp[0]])
+                    temp_nltk.columns = temp['index']
+                    temp_nltk["collected_percentage"] = collected_percentage
+                    temp_nltk["collected_percentage"] = temp_nltk["collected_percentage"].str[:-1]
+                    df_append.append(temp_nltk)
                 except Exception as e:
                     print(e)
                     break
 
+            df_nltk = pd.concat(df_append)
+            df_nltk.reset_index(inplace = True)
+            df_nltk.drop(['index'], axis=1, inplace=True)
 
+
+            df_nltk.to_sql('ML_SET', self.engine, if_exists='replace', index = False)

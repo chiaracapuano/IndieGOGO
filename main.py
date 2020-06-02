@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from Extractor import Extractor
 from Scraper import Scraper_Features
 import configparser
+from Prediction import Prediction
 from flask import Flask, request, Response
 import joblib
 import sys
@@ -24,10 +25,10 @@ def model(extract = False):
     database."""
     if extract ==True:
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
-        extractor = Extractor(engine, directory)
-        extractor.extract()
-        scraper_features = Scraper_Features
-        scraper_features.scrape_and_features()
+        #extractor = Extractor(engine, directory)
+        #extractor.extract()
+        #scraper_features = Scraper_Features
+        #scraper_features.scrape_and_features()
         ml_training = ml_model(user, password, host, port, driver, url, table)
         ml_training.make_model()
 
@@ -56,11 +57,11 @@ def home():
             } 
         </style>
     <body>
-        <h1>Please enter a topic you'd like to watch a movie about</h1>
-        <h3>Movies obtained from https://www.netflix.com/browse/genre/34399</h3>
+        <h1>Please enter a IndieGOGO website link...</h1>
+        <h3>to evaluate if the campaign will be successful</h3>
         <div>
             <form action="/api/suggest" method="get">
-                <label for="q">Topic:</label><br>
+                <label for="q">Link:</label><br>
                 <input type="text" id="q" name="q" value=""><br>
             </form>
         </div>
@@ -71,9 +72,8 @@ def home():
 @app.route("/api/suggest")
 def Suggest():
     q = request.args.get('q')
-    prediction = Prediction(df, df_ratings, q, rv, nlp)
-    result = suggestions.calculate_weigths()
-    return Response(result.to_json(orient="records"), mimetype='application/json')
+    prediction = Prediction(q, rv)
+    prediction.predict()
 
 
 

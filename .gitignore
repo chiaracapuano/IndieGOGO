@@ -2,4 +2,5 @@
 /venv/
 RawFiles
 *.pickle
-../../Library/Application Support/JetBrains/PyCharm2020.1/scratches/login.config
+login.config
+*.model

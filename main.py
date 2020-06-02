@@ -1,12 +1,14 @@
-from ML_training import ml_model
+from ModelPrep.ML_training import ml_model
 from sqlalchemy import create_engine
-from Extractor import Extractor
-from Scraper import Scraper_Features
 import configparser
 from Prediction import Prediction
-from flask import Flask, request, Response
-import joblib
+from flask import Flask, request
+from pyspark.ml.classification import LogisticRegressionModel
 import sys
+from pyspark import SparkContext
+
+
+sc = SparkContext(appName="prediction")
 
 configParser = configparser.RawConfigParser()
 configFilePath = './login.config'
@@ -32,9 +34,9 @@ def model(extract = False):
         ml_training = ml_model(user, password, host, port, driver, url, table)
         ml_training.make_model()
 
-model(extract=True)
+model()
 try:
-    rv = joblib.load('update-database/filename.pickle')
+    loaded_model = LogisticRegressionModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-LR-model")
 except:
     print("Unexpected error:", sys.exc_info()[0])
     raise
@@ -42,8 +44,7 @@ print("loaded file")
 
 
 app = Flask(__name__)
-
-
+trial_url = "https://www.indiegogo.com//projects/imeeonthemove2017"
 @app.route("/")
 def home():
     return """
@@ -68,12 +69,11 @@ def home():
         </body>
     </html>
            """
-
 @app.route("/api/suggest")
 def Suggest():
     q = request.args.get('q')
-    prediction = Prediction(q, rv)
-    prediction.predict()
+    prediction = Prediction(q, loaded_model,sc)
+    return prediction.predict()
 
 
 

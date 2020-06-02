@@ -3,14 +3,17 @@ import json
 import gzip
 import pandas as pd
 class Extractor:
-    def __init__(self, engine):
+    def __init__(self, engine, directory):
         self.engine = engine
+        self.directory = directory
 
 
 
     def extract(self):
+        """This function extracts the projects URLS in IndieGOGO from the json files in the RawFiles folder
+        and dumps them in a Postgres table."""
 
-        directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
+        directory = self.directory
         df = pd.DataFrame()
         con = self.engine.connect()
 

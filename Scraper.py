@@ -15,13 +15,11 @@ class Scraper_Features:
 
 
     def scrape_and_features(self):
-        """Obtain list of movies URLs from Netflix movies home page,
-        scrape each link (that corresponds to a movie) to obtain the description of the movie,
-        identify tags from the description using Rake.
-        The Netflix genre tags are also included in the tags.
-        This class returns a df that contains Code (movie URL) and Tags (obtained from movie description+Netflix tags).
-        Dump the identified tags in a pickled file.
-        The pickled file will make the comparison between tags and word in input much faster."""
+        """This function scrapes the URLs listed in the Postgres table, filled by the Extractpr.
+        Selenium is used to push the "LOAD MORE" button, in order to scrape the full webpage.
+        NLTK is used to extract the text features of the webpage.
+        The results are dumped in the ml_set Postgres table, and will be later used to train the logistic regression model."""
+
         df_urls = pd.read_sql_query('select * from "URLS"', con = self.engine)
         LOAD_MORE_BUTTON_XPATH = '//*[@id="vCampaignRouterContent"]/div[2]/div/div[2]/button'
 
@@ -31,9 +29,7 @@ class Scraper_Features:
         for url in df_urls["URL"]:
             count = count + 1
             driver.get(url)
-            print(url)
             collected_percentage = df_urls["collected_percentage"][count]
-            print(collected_percentage)
             while True:
                 try:
                     loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
@@ -45,9 +41,6 @@ class Scraper_Features:
                     for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
 
                         span = a.text
-
-
-
                         lower_case = span.lower()
                         tokens = nltk.word_tokenize(lower_case)
                         tags = nltk.pos_tag(tokens)
@@ -61,7 +54,7 @@ class Scraper_Features:
                         tags = nltk.pos_tag(tokens)
                         counts_div = Counter(tag for word, tag in tags if tag.isalpha())
 
-                    counts_tot =   counts_span+counts_div
+                    counts_tot = counts_span+counts_div
                     temp = pd.DataFrame.from_dict(counts_tot, orient='index').reset_index()
                     temp_nltk = pd.DataFrame([temp[0]])
                     temp_nltk.columns = temp['index']
@@ -77,4 +70,4 @@ class Scraper_Features:
             df_nltk.drop(['index'], axis=1, inplace=True)
 
 
-            df_nltk.to_sql('ML_SET', self.engine, if_exists='replace', index = False)
+            df_nltk.to_sql('ml_set', self.engine, if_exists='replace', index = False)

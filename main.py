@@ -5,6 +5,7 @@ from Scraper import Scraper_Features
 import configparser
 from flask import Flask, request, Response
 import joblib
+import sys
 
 configParser = configparser.RawConfigParser()
 configFilePath = './login.config'
@@ -70,7 +71,7 @@ def home():
 @app.route("/api/suggest")
 def Suggest():
     q = request.args.get('q')
-    suggestions = Suggestions(df, df_ratings, q, rv, nlp)
+    prediction = Prediction(df, df_ratings, q, rv, nlp)
     result = suggestions.calculate_weigths()
     return Response(result.to_json(orient="records"), mimetype='application/json')
 

@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 import configparser
 from Prediction import Prediction
 from flask import Flask, request
-from pyspark.ml.classification import LogisticRegressionModel
+from pyspark.ml.tuning import CrossValidatorModel
 import sys
 from pyspark import SparkContext
 
@@ -34,9 +34,9 @@ def model(extract = False):
         ml_training = ml_model(user, password, host, port, driver, url, table, sc)
         ml_training.make_model()
 
-model(extract = True)
+model()
 try:
-    loaded_model = LogisticRegressionModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-cvLR-model")
+    loaded_model = CrossValidatorModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-cvLR-model")
 except:
     print("Unexpected error:", sys.exc_info()[0])
     raise

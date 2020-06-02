@@ -6,9 +6,7 @@ from collections import Counter
 import bs4 as bs
 import pandas as pd
 from pyspark.sql import SQLContext
-from pyspark.ml.feature import ChiSqSelector
 from pyspark.ml.feature import VectorAssembler
-from pyspark.ml.feature import StandardScaler
 
 
 class Prediction:

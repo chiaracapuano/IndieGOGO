@@ -11,7 +11,7 @@ from pyspark.ml.tuning import ParamGridBuilder, CrossValidator
 
 
 class ml_model:
-  def __init__(self, user, password, host, port, driver, url, table):
+  def __init__(self, user, password, host, port, driver, url, table, sc):
     self.user = user
     self.password = password
     self.host = host
@@ -19,6 +19,7 @@ class ml_model:
     self.driver = driver
     self.url = url
     self.table = table
+    self.sc = sc
 
   def make_model(self):
     """The function dumps the content of the Postgres table ml_set into a PySpark df.
@@ -29,8 +30,7 @@ class ml_model:
     -perform a 5-fold cross-validation to optimize the model parameters
     The logistic regression model trained is then dumped into a .pickle file that will not require the model
     to be retrained every time the user wants to perform a prediction."""
-    sc = SparkContext(appName="pandasToSparkDF")
-    sqlContext = SQLContext(sc)
+    sqlContext = SQLContext(self.sc)
 
 
 
@@ -69,7 +69,6 @@ class ml_model:
 
     css = ChiSqSelector(featuresCol='Scaled_features',outputCol='Aspect',labelCol='collected_percentage_binary',fpr=0.05)
     training=css.fit(training).transform(training)
-    test=css.fit(test).transform(test)
 
 
     lr = LogisticRegression(labelCol="collected_percentage_binary", featuresCol="Aspect",weightCol="classWeights",maxIter=10)

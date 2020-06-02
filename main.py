@@ -31,12 +31,12 @@ def model(extract = False):
         #extractor.extract()
         #scraper_features = Scraper_Features
         #scraper_features.scrape_and_features()
-        ml_training = ml_model(user, password, host, port, driver, url, table)
+        ml_training = ml_model(user, password, host, port, driver, url, table, sc)
         ml_training.make_model()
 
-model()
+model(extract = True)
 try:
-    loaded_model = LogisticRegressionModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-LR-model")
+    loaded_model = LogisticRegressionModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-cvLR-model")
 except:
     print("Unexpected error:", sys.exc_info()[0])
     raise

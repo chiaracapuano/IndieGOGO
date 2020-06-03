@@ -1,6 +1,8 @@
+from ModelPrep.Extractor import Extractor
 from ModelPrep.ML_training import ml_model
 from sqlalchemy import create_engine
 import configparser
+from ModelPrep.Scraper import Scraper_Features
 from Prediction import Prediction
 from flask import Flask, request
 from pyspark.ml.tuning import CrossValidatorModel
@@ -27,10 +29,10 @@ def model(extract = False):
     database."""
     if extract ==True:
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
-        #extractor = Extractor(engine, directory)
-        #extractor.extract()
-        #scraper_features = Scraper_Features
-        #scraper_features.scrape_and_features()
+        extractor = Extractor(engine, directory)
+        extractor.extract()
+        scraper_features = Scraper_Features(engine)
+        scraper_features.scrape_and_features()
         ml_training = ml_model(user, password, host, port, driver, url, table, sc)
         ml_training.make_model()
 
@@ -44,7 +46,7 @@ print("loaded file")
 
 
 app = Flask(__name__)
-trial_url = "https://www.indiegogo.com//projects/imeeonthemove2017"
+
 @app.route("/")
 def home():
     return """
@@ -54,7 +56,7 @@ def home():
                 text-align:center; 
             } 
             h1 { 
-                color:green; 
+                color:black; 
             } 
         </style>
     <body>
@@ -72,7 +74,7 @@ def home():
 @app.route("/api/suggest")
 def Suggest():
     q = request.args.get('q')
-    prediction = Prediction(q, loaded_model,sc)
+    prediction = Prediction(q, loaded_model, sc)
     return prediction.predict()
 
 

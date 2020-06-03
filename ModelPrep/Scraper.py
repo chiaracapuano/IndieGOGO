@@ -27,43 +27,44 @@ class Scraper_Features:
         driver = webdriver.Chrome(ChromeDriverManager().install())
         df_append = []
         for url in df_urls["URL"]:
+            counts_tot_list=[]
             count = count + 1
             driver.get(url)
             collected_percentage = df_urls["collected_percentage"][count]
-            while True:
-                try:
-                    loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
-                    time.sleep(2)
-                    loadMoreButton.click()
-                    time.sleep(5)
-                    soup = bs.BeautifulSoup(driver.page_source, "html.parser")
+            try:
+                loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
+                time.sleep(2)
+                loadMoreButton.click()
+                time.sleep(5)
+                soup = bs.BeautifulSoup(driver.page_source, "html.parser")
 
-                    for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
+                for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
+                    span = a.text
+                    lower_case = span.lower()
+                    tokens = nltk.word_tokenize(lower_case)
+                    tags = nltk.pos_tag(tokens)
+                    counts_span = Counter(tag for word, tag in tags if tag.isalpha())
+                    counts_tot_list.append(counts_span)
+                for a in soup.find_all('div', {'class': "routerContentStory-storyBody"}):
+                    div = a.text
+                    lower_case = div.lower()
+                    tokens = nltk.word_tokenize(lower_case)
+                    tags = nltk.pos_tag(tokens)
+                    counts_div = Counter(tag for word, tag in tags if tag.isalpha())
+                    counts_tot_list.append(counts_div)
 
-                        span = a.text
-                        lower_case = span.lower()
-                        tokens = nltk.word_tokenize(lower_case)
-                        tags = nltk.pos_tag(tokens)
-                        counts_span = Counter(tag for word, tag in tags if tag.isalpha())
-
-                    for a in soup.find_all('div', {'class': "routerContentStory-storyBody"}):
-
-                        div = a.text
-                        lower_case = div.lower()
-                        tokens = nltk.word_tokenize(lower_case)
-                        tags = nltk.pos_tag(tokens)
-                        counts_div = Counter(tag for word, tag in tags if tag.isalpha())
-
-                    counts_tot = counts_span+counts_div
-                    temp = pd.DataFrame.from_dict(counts_tot, orient='index').reset_index()
-                    temp_nltk = pd.DataFrame([temp[0]])
-                    temp_nltk.columns = temp['index']
-                    temp_nltk["collected_percentage"] = collected_percentage
-                    temp_nltk["collected_percentage"] = temp_nltk["collected_percentage"].str[:-1]
-                    df_append.append(temp_nltk)
-                except Exception as e:
-                    print(e)
-                    break
+                counts_tot = Counter()
+                for x in counts_tot_list:
+                    counts_tot += x
+                temp = pd.DataFrame.from_dict(counts_tot, orient='index').reset_index()
+                temp_nltk = pd.DataFrame([temp[0]])
+                temp_nltk.columns = temp['index']
+                temp_nltk["collected_percentage"] = collected_percentage
+                temp_nltk["collected_percentage"] = temp_nltk["collected_percentage"].str[:-1]
+                df_append.append(temp_nltk)
+            except Exception as e:
+                print(e)
+                break
 
             df_nltk = pd.concat(df_append)
             df_nltk.reset_index(inplace = True)

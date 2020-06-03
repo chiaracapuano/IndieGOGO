@@ -4,3 +4,5 @@ RawFiles
 *.pickle
 login.config
 *.model
+scrape_trial.py
+readgz_trial.py

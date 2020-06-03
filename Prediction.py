@@ -17,33 +17,36 @@ class Prediction:
 
     def predict(self):
         url = self.q
+        counts_tot_list=[]
         LOAD_MORE_BUTTON_XPATH = '//*[@id="vCampaignRouterContent"]/div[2]/div/div[2]/button'
-
-        driver = webdriver.Chrome(ChromeDriverManager().install())
-        driver.get(url)
         try:
+
+            driver = webdriver.Chrome(ChromeDriverManager().install())
+            driver.get(url)
             loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
             time.sleep(2)
             loadMoreButton.click()
             time.sleep(5)
             soup = bs.BeautifulSoup(driver.page_source, "html.parser")
             for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
-
                 span = a.text
                 lower_case = span.lower()
                 tokens = nltk.word_tokenize(lower_case)
                 tags = nltk.pos_tag(tokens)
                 counts_span = Counter(tag for word, tag in tags if tag.isalpha())
-
+                counts_tot_list.append(counts_span)
             for a in soup.find_all('div', {'class': "routerContentStory-storyBody"}):
-
                 div = a.text
                 lower_case = div.lower()
                 tokens = nltk.word_tokenize(lower_case)
                 tags = nltk.pos_tag(tokens)
                 counts_div = Counter(tag for word, tag in tags if tag.isalpha())
+                counts_tot_list.append(counts_div)
 
-            counts_tot = counts_span+counts_div
+            counts_tot = Counter()
+            for x in counts_tot_list:
+                counts_tot += x
+            print(counts_tot)
             temp = pd.DataFrame.from_dict(counts_tot, orient='index').reset_index()
             temp_nltk = pd.DataFrame([temp[0]])
             temp_nltk.columns = temp['index']

@@ -56,7 +56,7 @@ class Prediction:
 
             features = sdf.schema.names
 
-            assembler = VectorAssembler(inputCols=features, outputCol="Aspect")
+            assembler = VectorAssembler(inputCols=features, outputCol="Assembled_sliced_features")
 
             test = assembler.transform(sdf)
             prediction = self.loaded_model.transform(test)

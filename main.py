@@ -12,22 +12,24 @@ from pyspark import SparkContext
 
 sc = SparkContext(appName="prediction")
 
-configParser = configparser.RawConfigParser()
-configFilePath = './login.config'
-configParser.read(configFilePath)
-user = configParser.get('dev-postgres-config', 'user')
-password = configParser.get('dev-postgres-config', 'pwd')
-host = configParser.get('dev-postgres-config', 'host')
-port = configParser.get('dev-postgres-config', 'port')
-engine = create_engine('postgresql+psycopg2://'+user+':'+password+'@'+host+':'+port+'/indiegogo_url')
-driver = "org.postgresql.Driver"
-url = "jdbc:postgresql://"+host+":"+port+"/indiegogo_url"
-table = "public.ml_set"
+
 
 def model(extract = False):
     """If extract==True, then the files in RawFiles folder are scanned to append new data to the pre-existing feature
     database."""
     if extract ==True:
+        configParser = configparser.RawConfigParser()
+        configFilePath = './login.config'
+        configParser.read(configFilePath)
+        user = configParser.get('dev-postgres-config', 'user')
+        password = configParser.get('dev-postgres-config', 'pwd')
+        host = configParser.get('dev-postgres-config', 'host')
+        port = configParser.get('dev-postgres-config', 'port')
+        engine = create_engine(
+            'postgresql+psycopg2://' + user + ':' + password + '@' + host + ':' + port + '/indiegogo_url')
+        driver = "org.postgresql.Driver"
+        url = "jdbc:postgresql://" + host + ":" + port + "/indiegogo_url"
+        table = "public.ml_set"
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
         extractor = Extractor(engine, directory)
         extractor.extract()
@@ -35,7 +37,7 @@ def model(extract = False):
         scraper_features.scrape_and_features()
         ml_training = ml_model(user, password, host, port, driver, url, table, sc)
         ml_training.make_model()
-
+#
 model()
 try:
     loaded_model = CrossValidatorModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-cvLR-model")

@@ -16,9 +16,16 @@ Selenium, and from each page a Counter and the amount of money (%) collected by 
 consitute the campaign ad corpus (as per NLTK tokenizer). The Counters and relative money raised are appended to a Posgres table which will be used to train the ML algorithm.
 * ML_training.py: the parts of speech collected in the Scraper are used to train a logistic regression algorithm in PySpark.
 The labels used are extracted from the amount of money raised for the campaign (the label is 0 if the campaign raised less than 100% the goal, 
-1 otherwise). The algorithm is optimized performing a 5-fold cross validation.
+1 otherwise). 
+The dataset is oversampled to compensate the higher count of 0s (almost 70% of the dataset). 
+The algorithm is optimized performing a 10-fold cross validation.
 
 **main.py** in the main folder contains the development of the Flask app. The app loads the previously trained ML model and allows the user to enter a link to an IndieGOGO campaign web address,
 then **Prediction.py** scrapes the address counting the parts of speech in it. The Counter obtained is passed to the ML model which evaluates wheter the campaign will be successful or not.
 
 Access to the Postgres DB is granted using the login details as per *login.file.example*.
+
+NOTES: interestingly, random forest can be used beforehand to identify the most relevant components of the DF (#https://www.timlrx.com/2018/06/19/feature-selection-using-feature-importance-score-creating-a-pyspark-estimator/
+). However, in this case it did not make any difference.
+
+CONCLUSION: the model is still biased towards predicting 0s, resulting in a lot of false negatives despite the oversampling. One solution could be to increase the dataset size. Alternatively, it might be that the parts of speech that compose the ads are not a good indicator for the success of the campaign.

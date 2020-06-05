@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 import configparser
 from ModelPrep.Scraper import Scraper_Features
 from Prediction import Prediction
-from flask import Flask, request
+from flask import Flask, request, render_template
 from pyspark.ml.tuning import CrossValidatorModel
 import sys
 from pyspark import SparkContext
@@ -30,14 +30,14 @@ def model(extract = False):
         url = "jdbc:postgresql://" + host + ":" + port + "/indiegogo_url"
         table = "public.ml_set"
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
-        #extractor = Extractor(engine, directory)
-        #extractor.extract()
-        #scraper_features = Scraper_Features(engine)
-        #scraper_features.scrape_and_features()
+        extractor = Extractor(engine, directory)
+        extractor.extract()
+        scraper_features = Scraper_Features(engine)
+        scraper_features.scrape_and_features()
         ml_training = ml_model(user, password, host, port, driver, url, table, sc)
         ml_training.make_model()
 
-model(extract = True)
+model()
 try:
     loaded_model = CrossValidatorModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-cvLR-model")
 except:
@@ -50,28 +50,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return """
-    <html><head></head>
-    <style> 
-            body { 
-                text-align:center; 
-            } 
-            h1 { 
-                color:black; 
-            } 
-        </style>
-    <body>
-        <h1>Please enter a IndieGOGO website link...</h1>
-        <h3>to evaluate if the campaign will be successful</h3>
-        <div>
-            <form action="/api/suggest" method="get">
-                <label for="q">Link:</label><br>
-                <input type="text" id="q" name="q" value=""><br>
-            </form>
-        </div>
-        </body>
-    </html>
-           """
+    return render_template("home.html")
 @app.route("/api/suggest")
 def Suggest():
     q = request.args.get('q')

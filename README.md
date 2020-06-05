@@ -20,6 +20,8 @@ The labels used are extracted from the amount of money raised for the campaign (
 The dataset is oversampled to compensate the higher count of 0s (almost 70% of the dataset). 
 The algorithm is optimized performing a 10-fold cross validation.
 
+The folder **templates** contains the **home.html** file that renders the webpage when the Flask app is run.
+
 **main.py** in the main folder contains the development of the Flask app. The app loads the previously trained ML model and allows the user to enter a link to an IndieGOGO campaign web address,
 then **Prediction.py** scrapes the address counting the parts of speech in it. The Counter obtained is passed to the ML model which evaluates wheter the campaign will be successful or not.
 

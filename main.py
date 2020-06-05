@@ -30,14 +30,14 @@ def model(extract = False):
         url = "jdbc:postgresql://" + host + ":" + port + "/indiegogo_url"
         table = "public.ml_set"
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
-        extractor = Extractor(engine, directory)
-        extractor.extract()
-        scraper_features = Scraper_Features(engine)
-        scraper_features.scrape_and_features()
+        #extractor = Extractor(engine, directory)
+        #extractor.extract()
+        #scraper_features = Scraper_Features(engine)
+        #scraper_features.scrape_and_features()
         ml_training = ml_model(user, password, host, port, driver, url, table, sc)
         ml_training.make_model()
 
-model()
+model(extract = True)
 try:
     loaded_model = CrossValidatorModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-cvLR-model")
 except:

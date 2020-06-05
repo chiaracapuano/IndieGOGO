@@ -86,7 +86,7 @@ class Prediction:
 
 
         except Exception as e:
-            print("Could you reload the page please?")
+            print(e)
 
 
 

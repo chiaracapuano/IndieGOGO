@@ -13,7 +13,6 @@ from pyspark import SparkContext
 sc = SparkContext(appName="prediction")
 
 
-
 def model(extract = False):
     """If extract==True, then the files in RawFiles folder are scanned to append new data to the pre-existing feature
     database."""
@@ -38,7 +37,7 @@ def model(extract = False):
         ml_training = ml_model(user, password, host, port, driver, url, table, sc)
         ml_training.make_model()
 
-model(extract = True)
+model()
 try:
     loaded_model = CrossValidatorModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-cvLR-model")
 except:

@@ -16,6 +16,11 @@ class Prediction:
         self.sc = sc
 
     def predict(self):
+        model_features = []
+        with open("/Users/chiara/PycharmProjects/IndieGOGO/ModelPrep/featurenames.txt") as file:
+            for line in file:
+                line = line.strip()  # or some other preprocessing
+                model_features.append(line)  # storing everything in memory!
         url = self.q
         counts_tot_list=[]
         LOAD_MORE_BUTTON_XPATH = '//*[@id="vCampaignRouterContent"]/div[2]/div/div[2]/button'
@@ -47,6 +52,14 @@ class Prediction:
             for x in counts_tot_list:
                 counts_tot += x
             print(counts_tot)
+
+            for el in model_features:
+                if el not in counts_tot.keys():
+                    counts_tot[el] = 0
+                else:
+                    continue
+            print(counts_tot)
+
             temp = pd.DataFrame.from_dict(counts_tot, orient='index').reset_index()
             temp_nltk = pd.DataFrame([temp[0]])
             temp_nltk.columns = temp['index']
@@ -59,16 +72,21 @@ class Prediction:
             assembler = VectorAssembler(inputCols=features, outputCol="features")
 
             test = assembler.transform(sdf)
+
             prediction = self.loaded_model.transform(test)
 
-            if prediction == 1:
-                return "The campaign will be successful!"
-            else:
+            result = prediction.select("prediction").toPandas()
+
+            if result["prediction"][0] == 0:
                 return "The campaign will be unsuccessful :("
+            else:
+                return "The campaign will be successful!!"
+
+
 
 
         except Exception as e:
-            print(e)
+            print("Could you reload the page please?")
 
 
 

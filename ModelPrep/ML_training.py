@@ -45,7 +45,9 @@ class ml_model:
     df = df.drop('collected_percentage')
     df_features = df.drop('collected_percentage_binary')
     features = df_features.schema.names
-
+    with open('./featurenames.txt', 'w+') as filehandle:
+      for listitem in features:
+        filehandle.write('%s\n' % listitem)
     # convert to vector representation for MLlib
     assembler = VectorAssembler(inputCols=features, outputCol="features")
     raw_data = assembler.transform(df)

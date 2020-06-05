@@ -25,7 +25,9 @@ then **Prediction.py** scrapes the address counting the parts of speech in it. T
 
 Access to the Postgres DB is granted using the login details as per *login.file.example*.
 
-NOTES: interestingly, random forest can be used beforehand to identify the most relevant components of the DF (#https://www.timlrx.com/2018/06/19/feature-selection-using-feature-importance-score-creating-a-pyspark-estimator/
+NOTES: 
+* interestingly, random forest can be used beforehand to identify the most relevant components of the DF (#https://www.timlrx.com/2018/06/19/feature-selection-using-feature-importance-score-creating-a-pyspark-estimator/
 ). However, in this case it did not make any difference.
+* the dataset used for training uses data from May 2016. More recent campaigns have a different webpage structures so this app should be adapted to accommodate for more recent campaigns.
 
 CONCLUSION: the model is still biased towards predicting 0s, resulting in a lot of false negatives despite the oversampling. One solution could be to increase the dataset size. Alternatively, it might be that the parts of speech that compose the ads are not a good indicator for the success of the campaign.

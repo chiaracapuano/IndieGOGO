@@ -52,41 +52,12 @@ class ml_model:
     assembler = VectorAssembler(inputCols=features, outputCol="features")
     raw_data = assembler.transform(df)
 
-    rf = RandomForestClassifier(labelCol="collected_percentage_binary", featuresCol="features", seed=8464,
-                                numTrees=10, cacheNodeIds=True, subsamplingRate=0.7)
-
-    mod = rf.fit(raw_data)
-    raw_data = mod.transform(raw_data)
-
-    def ExtractFeatureImp(featureImp, dataset, featuresCol):
-      list_extract = []
-      for i in dataset.schema[featuresCol].metadata["ml_attr"]["attrs"]:
-        list_extract = list_extract + dataset.schema[featuresCol].metadata["ml_attr"]["attrs"][i]
-      varlist = pd.DataFrame(list_extract)
-      varlist['score'] = varlist['idx'].apply(lambda x: featureImp[x])
-      return (varlist.sort_values('score', ascending=False))
-
-    varlist = ExtractFeatureImp(mod.featureImportances, raw_data, "features")
-    varidx = [x for x in varlist['idx'][0:10]]
-
-    slicer = VectorSlicer(inputCol="features", outputCol="Sliced_features", indices=varidx)
-    raw_data = slicer.transform(raw_data)
-    raw_data = raw_data.drop('rawPrediction', 'probability', 'prediction')
-
-    df_features = raw_data.drop('collected_percentage_binary')
-    sliced_features = df_features.schema.names
-
-    # convert to vector representation for MLlib
-
-    assembler = VectorAssembler(inputCols=sliced_features, outputCol="Assembled_sliced_features")
-    raw_data = assembler.transform(raw_data)
-
 
     # oversample to compensate for the disparity in data labels
 
     zeroes = raw_data.filter(col("collected_percentage_binary") == 0)
     ones = raw_data.filter(col("collected_percentage_binary") == 1)
-
+    print(zeroes.count(), ones.count())
     if zeroes.count() >ones.count():
       major_df = zeroes
       minor_df = ones
@@ -94,9 +65,7 @@ class ml_model:
       major_df = ones
       minor_df = zeroes
 
-
     ratio = int(major_df.count() / minor_df.count())
-
     a = range(ratio)
 
     # duplicate the minority rows
@@ -128,6 +97,6 @@ class ml_model:
     predict_test = cvModel.transform(test)
     print("The area under ROC for train set after CV  is {}".format(evaluator.evaluate(predict_train)))
     print("The area under ROC for test set after CV  is {}".format(evaluator.evaluate(predict_test)))
-    cvModel.write().overwrite().save("./PySpark-cvLR-model")
+    cvModel.write().overwrite().save("./PySpark-cvLR-ml_set_complete")
 
     print("Model Saved")

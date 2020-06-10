@@ -75,8 +75,8 @@ class Scraper_Features:
                     temp = pd.DataFrame.from_dict(counts_tot, orient='index').reset_index()
                     temp_nltk = pd.DataFrame([temp[0]])
                     temp_nltk.columns = temp['index']
-                    temp_nltk["collected_percentage"] = collected_percentage
-                    temp_nltk["collected_percentage"] = temp_nltk["collected_percentage"].str[:-1]
+                    temp_nltk["COLLECTED_PERCENTAGE"] = collected_percentage
+                    temp_nltk["COLLECTED_PERCENTAGE"] = temp_nltk["COLLECTED_PERCENTAGE"].str[:-1]
                     df_append.append(temp_nltk)
                 except Exception as e:
                     print(e)
@@ -87,8 +87,8 @@ class Scraper_Features:
                 df_nltk.drop(['index'], axis=1, inplace=True)
                 df_nltk = df_nltk.reindex(sorted(df_nltk.columns), axis=1)
 
-
-                df_nltk.to_sql('ml_set{}'.format(self.date), self.engine, if_exists='replace', index = False)
+                date = self.date.replace("-","_")
+                df_nltk.to_sql('sorted_ml_set{}'.format(date), self.engine, if_exists='replace', index = False)
 
 
 

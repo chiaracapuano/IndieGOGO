@@ -29,8 +29,8 @@ def model(extract = False):
             'postgresql+psycopg2://' + user + ':' + password + '@' + host + ':' + port + '/indiegogo_url')
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
 
-        #extractor = Extractor(engine, directory)
-        #extractor.extract()
+        extractor = Extractor(engine, directory)
+        extractor.extract()
 
         create_set = Create_set(engine)
         create_set.maskunion()
@@ -41,14 +41,17 @@ def model(extract = False):
         ml_training = ml_model(user, password, host, port, driver, url, table, sc)
         ml_training.make_model()
 
-model(extract = True)
+model()
+
+
+
+
 try:
-    loaded_model = CrossValidatorModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-cvLR-model")
+    loaded_model = CrossValidatorModel.load("/Users/chiara/PycharmProjects/IndieGOGO/PySpark-cvLR-ml_set_complete")
 except:
     print("Unexpected error:", sys.exc_info()[0])
     raise
 print("loaded file")
-
 
 app = Flask(__name__)
 

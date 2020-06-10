@@ -51,7 +51,6 @@ class Prediction:
             counts_tot = Counter()
             for x in counts_tot_list:
                 counts_tot += x
-            print(counts_tot)
 
             for el in model_features:
                 if el not in counts_tot.keys():
@@ -76,7 +75,7 @@ class Prediction:
             prediction = self.loaded_model.transform(test)
 
             result = prediction.select("prediction").toPandas()
-
+            print(result["prediction"][0])
             if result["prediction"][0] == 0:
                 return "The campaign will be unsuccessful :("
             else:

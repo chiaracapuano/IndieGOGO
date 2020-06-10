@@ -15,7 +15,7 @@ consitute the campaign ad corpus (as per NLTK tokenizer). The Counters and money
 * Create_set.py: connects to the DB and runs a stored prcedure saved n the DB, which unions all the tables created in the previous step into a single table (ml_set_complete) to be used to train the ML algorithm.
 * ML_training.py: the table created in the previous step is used to train a logistic regression algorithm in PySpark.
 The labels used are extracted from the amount of money raised for the campaign (the label is 0 if the campaign raised less than 100% the goal, 
-1 otherwise). 
+1 otherwise). Around 10000 data points used for training and testing of the logistic regression algorithm lead to an area under the ROC curve of about 60%, meaning that either further data points are needed or that the parts of speech of a campaign might not be an indicator of its success.
 The dataset is oversampled to compensate the higher count of 0s (almost 70% of the dataset). 
 The algorithm is optimized performing a 10-fold cross validation.
 
@@ -31,4 +31,4 @@ NOTES:
 ). However, in this case it did not make any difference.
 * the dataset used for training uses data from May 2016. More recent campaigns have a different webpage structures so this app should be adapted to accommodate for more recent campaigns.
 
-CONCLUSION: the model is still biased towards predicting 0s, resulting in a lot of false negatives despite the oversampling. One solution could be to increase the dataset size. Alternatively, it might be that the parts of speech that compose the ads are not a good indicator for the success of the campaign.
+

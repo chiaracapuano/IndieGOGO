@@ -3,6 +3,11 @@ This repo contains the development of a Flask app, that evaluates whether a camp
 The app pulls data from a Postgres DB and evaluates the parts of speech that constitute the campaign ad. The parts of speech will be dumped in an array 
 that a PySpark trained logistic regression algorithm will use to determine if the campaign will be successful or not.
 
+![alt text](https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/home-page.png)
+
+![alt text](https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/output.png)
+
+
 * DB creation/update
 * Flask App developement
 

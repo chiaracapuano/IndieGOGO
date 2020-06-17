@@ -1,9 +1,11 @@
 # IndieGOGO
 This repo contains the development of a Flask app, that evaluates whether a campaign launched on the IndieGOGO website will be successful or not.
-The app pulls data from a Postgres DB and evaluates the parts of speech that constitute the campaign ad. The parts of speech will be dumped in an array 
-that a PySpark trained logistic regression algorithm will use to determine if the campaign will be successful or not.
+
+The home page invites the user to input an IndieGOGO ad link:
 
 ![alt text](https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/home-page.png)
+
+a pre-trained PySpark logistic regression model will determine whether the campaign will be successful or not, based on the parts of speech extracted via NLP:
 
 ![alt text](https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/output.png)
 

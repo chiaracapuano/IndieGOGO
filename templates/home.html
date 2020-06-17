@@ -1,22 +1,40 @@
 <!DOCTYPE html>
 <html lang="en"><head></head>
     <style>
-            body {
-                text-align:center;
+             body {
+                background: white;
             }
             h1 {
-                color:black;
+                color:deeppink;
+            }
+            h2 {
+                color:deeppink;
+            }
+            h3 {
+                color:hotpink;
+            }
+            div {
+                height: 200px;
+                width: 1000px;
+
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                margin-top: -200px;
+                margin-left: -520px;
+                font-family: SansSerif;
             }
         </style>
     <body>
-        <h1>Please enter a IndieGOGO website link...</h1>
-        <h2>to evaluate if the campaign will be successful</h2>
-        <div>
+    <div>
+
+        <h1 style="text-align:center">Please enter an IndieGOGO campaign link...</h1>
+        <h2 style="text-align:center">and I will tell you if it will be successful or not.</h2>
             <form action="/api/suggest" method="get">
-                <label for="q">Link:</label><br>
-                <input type="text" id="q" name="q" value=""><br>
+                <input style="display:block; margin : 0 auto;" type="text" id="q" name="q" value="" width="70" height="96"><br>
             </form>
+                <h3 style="text-align:center">The link will open a Chrome page, then the success of the campaign will be evaluated.</h3>
+
         </div>
-        <h3>The link will be opened in a Chrome page, then the success of the campaign will be computed.</h3>
         </body>
     </html>

@@ -7,6 +7,7 @@ import bs4 as bs
 import pandas as pd
 from pyspark.sql import SQLContext
 from pyspark.ml.feature import VectorAssembler
+from jinja2 import Environment, FileSystemLoader
 
 
 class Prediction:
@@ -75,11 +76,19 @@ class Prediction:
             prediction = self.loaded_model.transform(test)
 
             result = prediction.select("prediction").toPandas()
-            print(result["prediction"][0])
+
             if result["prediction"][0] == 0:
-                return "The campaign will be unsuccessful :("
+                output = "The campaign will be unsuccessful :("
             else:
-                return "The campaign will be successful!!"
+                output = "The campaign will be successful!!"
+
+            env = Environment(loader=FileSystemLoader('./templates'))
+
+            template = env.get_template("output.html")
+
+            template_vars = {"output": output}
+
+            return template.render(template_vars)
 
 
 

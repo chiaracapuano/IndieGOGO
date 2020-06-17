@@ -3,7 +3,7 @@ This repo contains the development of a Flask app, that evaluates whether a camp
 
 The home page invites the user to input an IndieGOGO ad link:
 
-![alt text](https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/home-page.png)
+<kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/home-page.png" /></kbd>
 
 A pre-trained PySpark logistic regression model will determine whether the campaign will be successful or not, based on the parts of speech extracted via NLP:
 

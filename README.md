@@ -5,13 +5,23 @@ The home page invites the user to input an IndieGOGO ad link:
 
 ![alt text](https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/home-page.png)
 
-a pre-trained PySpark logistic regression model will determine whether the campaign will be successful or not, based on the parts of speech extracted via NLP:
+A pre-trained PySpark logistic regression model will determine whether the campaign will be successful or not, based on the parts of speech extracted via NLP:
 
 ![alt text](https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/output.png)
 
+The Python codebase is contained in the three folders of this repo:
 
-* DB creation/update
-* Flask App developement
+* home folder
+* ModelPrep
+* templates
+
+#### home folder
+The Flask app corpus is contained in the file **main.py**. The app loads the previously trained ML model in the folder **PySpark-cvLR-ml_set_complete** and allows the user to enter a link to an IndieGOGO campaign web address.
+**Prediction.py** is called in the main, it scrapes the address in input and evaluates the parts of speech in the ad, storing them in a Counter. The Counter obtained is passed to the ML model, which computes wheter the campaign will be successful or not.
+
+The main also contains a function *model* that defaults to Flase, which can be used to retrain the model as well as create a whole new training-test dataset.
+
+#### ModelPrep
 
 The folder **ModelPrep** contains the classes:
 
@@ -26,12 +36,16 @@ The labels used are extracted from the amount of money raised for the campaign (
 The dataset is oversampled to compensate the higher count of 0s (almost 70% of the dataset). 
 The algorithm is optimized performing a 10-fold cross validation.
 
-The folder **templates** contains the **home.html** file that renders the webpage when the Flask app is run.
-
-**main.py** in the main folder contains the development of the Flask app. The app loads the previously trained ML model and allows the user to enter a link to an IndieGOGO campaign web address,
-then **Prediction.py** scrapes the address counting the parts of speech in it. The Counter obtained is passed to the ML model which evaluates wheter the campaign will be successful or not.
-
 Access to the Postgres DB is granted using the login details as per *login.file.example*.
+
+
+#### Templates
+
+The folder **templates** contains:
+* **home.html**: file that renders the home page of the Flask app
+* **output.html**: file that renders the dataframe visualized in output as movie suggestions.
+
+
 
 NOTES: 
 * interestingly, random forest can be used beforehand to identify the most relevant components of the DF (#https://www.timlrx.com/2018/06/19/feature-selection-using-feature-importance-score-creating-a-pyspark-estimator/

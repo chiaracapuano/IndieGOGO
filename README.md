@@ -48,7 +48,7 @@ The folder **templates** contains:
 
 
 NOTES: 
-* interestingly, random forest can be used beforehand to identify the most relevant components of the DF (#https://www.timlrx.com/2018/06/19/feature-selection-using-feature-importance-score-creating-a-pyspark-estimator/
+* interestingly, random forest can be used beforehand to identify the most relevant components of the DF (https://www.timlrx.com/2018/06/19/feature-selection-using-feature-importance-score-creating-a-pyspark-estimator/
 ). However, in this case it did not make any difference.
 * the dataset used for training uses data from May 2016. More recent campaigns have a different webpage structures so this app should be adapted to accommodate for more recent campaigns.
 

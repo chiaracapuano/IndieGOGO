@@ -7,7 +7,7 @@ The home page invites the user to input an IndieGOGO ad link:
 
 A pre-trained PySpark logistic regression model will determine whether the campaign will be successful or not, based on the parts of speech extracted via NLP:
 
-![alt text](https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/output.png)
+<kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/output.png" /></kbd>
 
 The Python codebase is contained in the three folders of this repo:
 

@@ -18,7 +18,7 @@ class Scraper_Features:
     def scrape_and_features(self):
         """This function scrapes the URLs listed in the Postgres table, filled by the Extractpr.
         Selenium is used to push the "LOAD MORE" button, in order to scrape the full webpage.
-        NLTK is used to extract the text features of the webpage.
+        TF-IDF is used to convert the text into a vector structure.
         The results are dumped in the ml_set Postgres table, and will be later used to train the logistic regression model."""
 
         df_urls = pd.read_sql_query('select * from "urls"', con = self.engine)

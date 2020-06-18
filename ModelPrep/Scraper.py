@@ -3,10 +3,6 @@ import pandas as pd
 import time
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
-from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-#nltk.download('averaged_perceptron_tagger')
 
 
 class Scraper_Features:
@@ -27,24 +23,17 @@ class Scraper_Features:
 
         count = 0
         driver = webdriver.Chrome(ChromeDriverManager().install())
-        stopwords_list = stopwords.words('english')
-        vectorizer = TfidfVectorizer(analyzer='word',
-                                     ngram_range=(1, 2),
-                                     min_df=0.003,
-                                     max_df=0.5,
-                                     max_features=5,
-                                     stop_words=stopwords_list)
+
 
 
         df = pd.DataFrame()
 
         for url in df_urls["url"]:
-            print(url)
             driver.get(url)
+
             collected_percentage = df_urls["collected_percentage"][count]
             count = count + 1
 
-            print(collected_percentage)
             while True:
                 try:
                     loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
@@ -63,10 +52,15 @@ class Scraper_Features:
                         div = a.text
                         div_list.append(div.lower())
 
-                    df['lower_case_span'] = " ".join(span_list)
-                    df['lower_case_div'] = " ".join(div_list)
-                    df["collected_percentage"] = collected_percentage
-                    df["collected_percentage"] = df["collected_percentage"].str[:-1]
+                    temp_dict = [
+                        {
+                            'lower_case_span': span_list,
+                            'lower_case_div': div_list,
+                            'collected_percentage': collected_percentage[:-1]
+                        }
+                    ]
+                    temp = pd.DataFrame.from_records(temp_dict)
+                    df = pd.concat([df, temp])
 
                     date = self.date.replace("-", "_")
                     df.to_sql('TF-IDF_ml_set{}'.format(date), self.engine, if_exists='replace', index=False)
@@ -79,14 +73,11 @@ class Scraper_Features:
                     break
 
 
-            #tfidf_matrix = vectorizer.fit_transform(df['lower_case_span'] + "" + df['lower_case_div'])
-            #print(tfidf_matrix)
 
 
 
 
-                #date = self.date.replace("-","_")
-                #df_nltk.to_sql('sorted_ml_set{}'.format(date), self.engine, if_exists='replace', index = False)
+
 
 
 

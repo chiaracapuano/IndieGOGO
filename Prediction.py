@@ -5,96 +5,96 @@ from webdriver_manager.chrome import ChromeDriverManager
 from collections import Counter
 import bs4 as bs
 import pandas as pd
-from pyspark.sql import SQLContext
-from pyspark.ml.feature import VectorAssembler
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 from jinja2 import Environment, FileSystemLoader
-
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 class Prediction:
-    def __init__(self, q, loaded_model, sc):
+    def __init__(self, q, engine):
         self.q = q
-        self.loaded_model = loaded_model
-        self.sc = sc
+        self.engine = engine
 
     def predict(self):
-        model_features = []
-        with open("/Users/chiara/PycharmProjects/IndieGOGO/ModelPrep/featurenames.txt") as file:
-            for line in file:
-                line = line.strip()  # or some other preprocessing
-                model_features.append(line)  # storing everything in memory!
-        url = self.q
-        counts_tot_list=[]
-        LOAD_MORE_BUTTON_XPATH = '//*[@id="vCampaignRouterContent"]/div[2]/div/div[2]/button'
-        try:
 
-            driver = webdriver.Chrome(ChromeDriverManager().install())
-            driver.get(url)
-            loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
-            time.sleep(2)
-            loadMoreButton.click()
-            time.sleep(5)
-            soup = bs.BeautifulSoup(driver.page_source, "html.parser")
-            for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
-                span = a.text
-                lower_case = span.lower()
-                tokens = nltk.word_tokenize(lower_case)
-                tags = nltk.pos_tag(tokens)
-                counts_span = Counter(tag for word, tag in tags if tag.isalpha())
-                counts_tot_list.append(counts_span)
-            for a in soup.find_all('div', {'class': "routerContentStory-storyBody"}):
-                div = a.text
-                lower_case = div.lower()
-                tokens = nltk.word_tokenize(lower_case)
-                tags = nltk.pos_tag(tokens)
-                counts_div = Counter(tag for word, tag in tags if tag.isalpha())
-                counts_tot_list.append(counts_div)
+            """The function dumps the content of the Postgres table ml_set into a PySpark df.
+            The df is manipulated in order to:
+            -label the successful campaigns (>+100% funding) with 1, the others with 0
+            -oversample the dataset to take care of the disparity in data labels (more 0s than 1s)
+            -perform a 10-fold cross-validation to optimize the model parameters
+            The logistic regression model trained is then dumped into a .pickle file that will not require the model
+            to be retrained every time the user wants to perform a prediction."""
+            df = pd.read_sql_query('select * from "TF-IDF_ml_set_2016_05_14"', con=self.engine)
+            df = df.fillna("")
+            stopwords_list = stopwords.words('english')
+            vectorizer = TfidfVectorizer(analyzer='word',
+                                         ngram_range=(1, 2),
+                                         min_df=0.003,
+                                         max_df=0.5,
+                                         max_features=5000,
+                                         stop_words=stopwords_list)
 
-            counts_tot = Counter()
-            for x in counts_tot_list:
-                counts_tot += x
+            url = self.q
 
-            for el in model_features:
-                if el not in counts_tot.keys():
-                    counts_tot[el] = 0
+            LOAD_MORE_BUTTON_XPATH = '//*[@id="vCampaignRouterContent"]/div[2]/div/div[2]/button'
+            try:
+
+                driver = webdriver.Chrome(ChromeDriverManager().install())
+                driver.get(url)
+                loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)
+                time.sleep(2)
+                loadMoreButton.click()
+                time.sleep(5)
+                soup = bs.BeautifulSoup(driver.page_source, "html.parser")
+                span_list = []
+                for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
+                    span = a.text
+                    span_list.append(span.lower())
+
+                div_list = []
+                for a in soup.find_all('div', {'class': "routerContentStory-storyBody"}):
+                    div = a.text
+                    div_list.append(div.lower())
+
+                temp_dict = [
+                    {
+                        'lower_case_span': span_list,
+                        'lower_case_div': div_list,
+                        'collected_percentage': " "
+                    }
+                ]
+                temp = pd.DataFrame.from_records(temp_dict)
+                df = pd.concat([df, temp])
+                df['lower_case_span'] = df['lower_case_span'].apply( lambda x: " ".join(x))
+                df['lower_case_div'] = df['lower_case_div'].apply( lambda x: " ".join(x))
+                tfidf_matrix = vectorizer.fit_transform(df['lower_case_span'] + " " + df['lower_case_div'])
+                cosine_similarities = cosine_similarity(tfidf_matrix[-1], tfidf_matrix[:-1])
+                cosine_similarities_series = cosine_similarities[0]
+                df = df[df['collected_percentage'] != " "]
+                df['cosine_similarities'] = cosine_similarities_series
+                df['collected_percentage_binary'] = [1 if x > 100 else 0 for x in df['collected_percentage'].astype(float)]
+
+                df_estimate = df[df['cosine_similarities'].astype(float) >0.8]
+
+                if df_estimate.empty:
+                    print('Not enough data-points to evaluate')
                 else:
-                    continue
-            print(counts_tot)
-
-            temp = pd.DataFrame.from_dict(counts_tot, orient='index').reset_index()
-            temp_nltk = pd.DataFrame([temp[0]])
-            temp_nltk.columns = temp['index']
-
-            sqlCtx = SQLContext(self.sc)
-            sdf = sqlCtx.createDataFrame(temp_nltk)
-
-            features = sdf.schema.names
-
-            assembler = VectorAssembler(inputCols=features, outputCol="features")
-
-            test = assembler.transform(sdf)
-
-            prediction = self.loaded_model.transform(test)
-
-            result = prediction.select("prediction").toPandas()
-
-            if result["prediction"][0] == 0:
-                output = "The campaign will be unsuccessful :("
-            else:
-                output = "The campaign will be successful!!"
-
-            env = Environment(loader=FileSystemLoader('./templates'))
-
-            template = env.get_template("output.html")
-
-            template_vars = {"output": output}
-
-            return template.render(template_vars)
+                    sum_ones = df_estimate['collected_percentage_binary'].sum()
+                    len_series = len(df_estimate['collected_percentage_binary'])
+                    if sum_ones > len_series:
+                        output = "The campaign will be unsuccessful :("
+                    else:
+                        output = "The campaign will be successful!!"
+                    print(output)
 
 
 
 
-        except Exception as e:
-            print(e)
+
+
+            except Exception as e:
+                print(e)
 
 
 

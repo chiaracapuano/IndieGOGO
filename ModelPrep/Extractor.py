@@ -8,9 +8,11 @@ from ModelPrep.Scraper import Scraper_Features
 
 
 class Extractor:
-    def __init__(self, engine, directory):
+    def __init__(self, engine, directory, N):
         self.engine = engine
         self.directory = directory
+        self.N = N
+
 
 
 
@@ -40,7 +42,7 @@ class Extractor:
                     df = pd.DataFrame()
 
                     for elem in j:
-                        if count < 10:
+                        if count < self.N:
                             url = 'https://www.indiegogo.com/'+elem["data"]["url"]
                             count = count + 1
                             print(url, count)
@@ -70,7 +72,7 @@ class Extractor:
                     df = pd.DataFrame()
 
                     for elem in j:
-                        if count < 10:
+                        if count < self.N:
                             url = 'https://www.indiegogo.com/' + elem["data"]["url"]
                             count = count + 1
                             print(url, count)

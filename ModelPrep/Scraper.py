@@ -38,9 +38,10 @@ class Scraper_Features:
 
         for url in df_urls["url"]:
             counts_tot_list=[]
-            count = count + 1
             driver.get(url)
             collected_percentage = df_urls["collected_percentage"][count]
+            count = count + 1
+
             while True:
                 try:
                     loadMoreButton = driver.find_element_by_xpath(LOAD_MORE_BUTTON_XPATH)

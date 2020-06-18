@@ -29,19 +29,19 @@ def model(extract = False):
             'postgresql+psycopg2://' + user + ':' + password + '@' + host + ':' + port + '/indiegogo_url')
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
 
-        #extractor = Extractor(engine, directory, 50)
-        #extractor.extract()
+        extractor = Extractor(engine, directory, 3000)
+        extractor.extract()
 
         create_set = Create_set(engine)
         create_set.maskunion()
-        driver = "org.postgresql.Driver"
-        url = "jdbc:postgresql://" + host + ":" + port + "/indiegogo_url"
-        table = "public.ml_set_complete"
-        url = 'https://www.indiegogo.com//projects/curated-wardrobes-versatile-responsibly-made-entrepreneurship-women'
-        ml_training = Prediction(url, engine)
-        ml_training.predict()
+        #
 
 model(extract =True)
+
+url = 'https://www.indiegogo.com//projects/curated-wardrobes-versatile-responsibly-made-entrepreneurship-women'
+
+ml_training = Prediction(url,engine)
+ml_training.predict()
 
 
 

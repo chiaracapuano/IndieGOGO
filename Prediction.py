@@ -10,6 +10,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from jinja2 import Environment, FileSystemLoader
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegressionCV
 
 class Prediction:
     def __init__(self, q, engine):
@@ -25,8 +26,8 @@ class Prediction:
             -perform a 10-fold cross-validation to optimize the model parameters
             The logistic regression model trained is then dumped into a .pickle file that will not require the model
             to be retrained every time the user wants to perform a prediction."""
-            df = pd.read_sql_query('select * from "TF-IDF_ml_set_2016_05_14"', con=self.engine)
-            df = df.fillna("")
+            df = pd.read_sql_query('select * from "idf_ml_set_complete"', con=self.engine)
+            df = df.fillna("0")
             stopwords_list = stopwords.words('english')
             vectorizer = TfidfVectorizer(analyzer='word',
                                          ngram_range=(1, 2),
@@ -61,7 +62,7 @@ class Prediction:
                     {
                         'lower_case_span': span_list,
                         'lower_case_div': div_list,
-                        'collected_percentage': " "
+                        'collected_percentage': np.NaN
                     }
                 ]
                 temp = pd.DataFrame.from_records(temp_dict)
@@ -71,7 +72,7 @@ class Prediction:
                 tfidf_matrix = vectorizer.fit_transform(df['lower_case_span'] + " " + df['lower_case_div'])
                 cosine_similarities = cosine_similarity(tfidf_matrix[-1], tfidf_matrix[:-1])
                 cosine_similarities_series = cosine_similarities[0]
-                df = df[df['collected_percentage'] != " "]
+                df = df.dropna()
                 df['cosine_similarities'] = cosine_similarities_series
                 df['collected_percentage_binary'] = [1 if x > 100 else 0 for x in df['collected_percentage'].astype(float)]
 
@@ -86,7 +87,27 @@ class Prediction:
                         output = "The campaign will be unsuccessful :("
                     else:
                         output = "The campaign will be successful!!"
-                    print(output)
+                    print("cos simil output:", output)
+
+                sdf = pd.DataFrame.sparse.from_spmatrix(tfidf_matrix)
+                sdf['collected_percentage'] = df['collected_percentage']
+                to_pred = sdf[sdf.isnull().any(1)]
+                X_to_pred = to_pred.drop(columns=["collected_percentage"])
+
+                sdf = sdf.dropna()
+
+                sdf['collected_percentage_binary'] = [1 if x > 100 else 0 for x in df['collected_percentage'].astype(float)]
+                X = sdf.drop(columns=["collected_percentage", "collected_percentage_binary"])
+                clf = LogisticRegressionCV(cv=5, random_state=0).fit(X, sdf['collected_percentage_binary'])
+
+                res = clf.predict(X_to_pred)
+                if res[0] == 0:
+                    output = "The campaign will be unsuccessful :("
+                else:
+                    output = "The campaign will be successful!!"
+                print("log reg output:", output)
+
+
 
 
 

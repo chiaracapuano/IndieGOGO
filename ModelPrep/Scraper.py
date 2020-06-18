@@ -5,6 +5,9 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from collections import Counter
 import nltk
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 nltk.download('averaged_perceptron_tagger')
 
 
@@ -27,12 +30,13 @@ class Scraper_Features:
         count = 0
         driver = webdriver.Chrome(ChromeDriverManager().install())
         df_append = []
-
-        model_features = []
-        with open("/Users/chiara/PycharmProjects/IndieGOGO/ModelPrep/featurenames.txt") as file:
-            for line in file:
-                line = line.strip()  # or some other preprocessing
-                model_features.append(line)
+        stopwords_list = stopwords.words('english')
+        vectorizer = TfidfVectorizer(analyzer='word',
+                                     ngram_range=(1, 2),
+                                     min_df=0.003,
+                                     max_df=0.5,
+                                     max_features=5000,
+                                     stop_words=stopwords_list)
 
 
 
@@ -52,17 +56,12 @@ class Scraper_Features:
                     for a in soup.find_all('span', {'class': "overviewSection-contentText"}):
                         span = a.text
                         lower_case = span.lower()
-                        tokens = nltk.word_tokenize(lower_case)
-                        tags = nltk.pos_tag(tokens)
-                        counts_span = Counter(tag for word, tag in tags if tag.isalpha())
-                        counts_tot_list.append(counts_span)
+
                     for a in soup.find_all('div', {'class': "routerContentStory-storyBody"}):
                         div = a.text
                         lower_case = div.lower()
-                        tokens = nltk.word_tokenize(lower_case)
-                        tags = nltk.pos_tag(tokens)
-                        counts_div = Counter(tag for word, tag in tags if tag.isalpha())
-                        counts_tot_list.append(counts_div)
+
+                    tfidf_matrix = vectorizer.fit_transform(articles_df['title'] + "" + articles_df['text'])
 
                     counts_tot = Counter()
                     for x in counts_tot_list:

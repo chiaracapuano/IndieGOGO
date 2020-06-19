@@ -1,8 +1,6 @@
-import nltk
 import time
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
-from collections import Counter
 import bs4 as bs
 import pandas as pd
 import numpy as np
@@ -65,18 +63,24 @@ class Prediction:
                         'collected_percentage': np.NaN
                     }
                 ]
+
+
+
+
+
                 temp = pd.DataFrame.from_records(temp_dict)
                 df = pd.concat([df, temp])
-                df['lower_case_span'] = df['lower_case_span'].apply( lambda x: " ".join(x))
-                df['lower_case_div'] = df['lower_case_div'].apply( lambda x: " ".join(x))
+                df['lower_case_span'] = df['lower_case_span'].apply(lambda x: " ".join(x))
+                df['lower_case_div'] = df['lower_case_div'].apply(lambda x: " ".join(x))
                 tfidf_matrix = vectorizer.fit_transform(df['lower_case_span'] + " " + df['lower_case_div'])
                 cosine_similarities = cosine_similarity(tfidf_matrix[-1], tfidf_matrix[:-1])
                 cosine_similarities_series = cosine_similarities[0]
                 df = df.dropna()
                 df['cosine_similarities'] = cosine_similarities_series
-                df['collected_percentage_binary'] = [1 if x > 100 else 0 for x in df['collected_percentage'].astype(float)]
+                df['collected_percentage_binary'] = [1 if x > 100 else 0 for x in
+                                                     df['collected_percentage'].astype(float)]
 
-                df_estimate = df[df['cosine_similarities'].astype(float) >0.8]
+                df_estimate = df[df['cosine_similarities'].astype(float) > 0.8]
 
                 if df_estimate.empty:
                     print('Not enough data-points to evaluate')
@@ -96,7 +100,8 @@ class Prediction:
 
                 sdf = sdf.dropna()
 
-                sdf['collected_percentage_binary'] = [1 if x > 100 else 0 for x in df['collected_percentage'].astype(float)]
+                sdf['collected_percentage_binary'] = [1 if x > 100 else 0 for x in
+                                                      df['collected_percentage'].astype(float)]
                 X = sdf.drop(columns=["collected_percentage", "collected_percentage_binary"])
                 clf = LogisticRegressionCV(cv=5, random_state=0).fit(X, sdf['collected_percentage_binary'])
 
@@ -108,14 +113,5 @@ class Prediction:
                 print("log reg output:", output)
 
 
-
-
-
-
-
-
             except Exception as e:
                 print(e)
-
-
-

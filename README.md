@@ -5,7 +5,7 @@ The home page invites the user to input an IndieGOGO ad link:
 
 <kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/home-page.png" /></kbd>
 
-A pre-trained PySpark logistic regression model will determine whether the campaign will be successful or not, based on the parts of speech extracted via NLP:
+A logistic regression model will determine whether the campaign will be successful or not, based on the parts of speech extracted via NLP:
 
 <kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/output.png" /></kbd>
 
@@ -15,13 +15,27 @@ The Python codebase is contained in the three folders of this repo:
 * ModelPrep
 * templates
 
+The ML model used n the **master** branch is a PySpark logistic regression pre-trained mode, while in the **TD_IDF** branch the model is a sklearn trained logistic regression model.
+
 #### home folder
 The Flask app corpus is contained in the file **main.py**. The app loads the previously trained ML model in the folder **PySpark-cvLR-ml_set_complete** and allows the user to enter a link to an IndieGOGO campaign web address.
+
+### Master Branch
+
 **Prediction.py** is called in the main, it scrapes the address in input and evaluates the parts of speech in the ad, storing them in a Counter. The Counter obtained is passed to the ML model, which computes wheter the campaign will be successful or not.
+
+### TF-IDF Branch
+
+**Prediction.py** is called in the main. It dumps the previously scraped addresses that form the database, scrapes the address in input and creates a dataframe appending the two. A tf-idf matrix is created, and its features used to train a sklearn logistic regression model (the user input link is obviously not included in the training).
+
+The success of the campaign in the link in input is then predicted. 
+
 
 The main also contains a function *model* that defaults to Flase, which can be used to retrain the model as well as create a whole new training-test dataset.
 
 #### ModelPrep
+
+### Master Branch
 
 The folder **ModelPrep** contains the classes:
 
@@ -35,6 +49,17 @@ The labels used are extracted from the amount of money raised for the campaign (
 1 otherwise). Around 10000 data points used for training and testing of the logistic regression algorithm lead to an area under the ROC curve of about 60%, meaning that either further data points are needed or that the parts of speech of a campaign might not be an indicator of its success.
 The dataset is oversampled to compensate the higher count of 0s (almost 70% of the dataset). 
 The algorithm is optimized performing a 10-fold cross validation.
+
+
+
+### TF-IDF Branch
+
+The folder **ModelPrep** contains the classes:
+
+* Extractor.py: which extracts the URLs of the campaigns from the json files offered by Web Robots at https://webrobots.io/indiegogo-dataset/ (saved in a specific local folder),
+and dumps them in a Postgres DB table. In Extractor.py, Scraper.py querys the URLs table produced by the extractor and scrapes the URLs using Python
+Selenium. Each url is scraped and the text dumped in a Postgres table. A table is produced for each json file in the local folder containing the campaign URLs: IndieGOGO is scraped by webrobots every month, therefore the table name contains the same date as the json file it has been created from.
+* Create_set.py: connects to the DB and runs a stored prcedure saved n the DB, which unions all the tables created in the previous step into a single table (ml_set_complete) to be used to train the ML algorithm.
 
 Access to the Postgres DB is granted using the login details as per *login.file.example*.
 

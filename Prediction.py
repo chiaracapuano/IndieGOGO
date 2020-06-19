@@ -29,8 +29,7 @@ class Prediction:
             stopwords_list = stopwords.words('english')
             vectorizer = TfidfVectorizer(analyzer='word',
                                          ngram_range=(1, 2),
-                                         min_df=0.003,
-                                         max_df=0.5,
+                                         max_df=0.95,
                                          max_features=5000,
                                          stop_words=stopwords_list)
 
@@ -77,21 +76,22 @@ class Prediction:
                 cosine_similarities_series = cosine_similarities[0]
                 df = df.dropna()
                 df['cosine_similarities'] = cosine_similarities_series
+                df['collected_percentage'] = df['collected_percentage'].str.replace(",",".")
+
                 df['collected_percentage_binary'] = [1 if x > 100 else 0 for x in
                                                      df['collected_percentage'].astype(float)]
 
                 df_estimate = df[df['cosine_similarities'].astype(float) > 0.8]
 
                 if df_estimate.empty:
-                    print('Not enough data-points to evaluate')
+                    output_cossim = 'Not enough data-points to evaluate'
                 else:
                     sum_ones = df_estimate['collected_percentage_binary'].sum()
                     len_series = len(df_estimate['collected_percentage_binary'])
                     if sum_ones > len_series:
-                        output = "The campaign will be unsuccessful :("
+                        output_cossim = "The campaign will be unsuccessful :("
                     else:
-                        output = "The campaign will be successful!!"
-                    print("cos simil output:", output)
+                        output_cossim = "The campaign will be successful!!"
 
                 sdf = pd.DataFrame.sparse.from_spmatrix(tfidf_matrix)
                 sdf['collected_percentage'] = df['collected_percentage']
@@ -99,18 +99,37 @@ class Prediction:
                 X_to_pred = to_pred.drop(columns=["collected_percentage"])
 
                 sdf = sdf.dropna()
-
+                sdf['collected_percentage'] = sdf['collected_percentage'].str.replace(",",".")
                 sdf['collected_percentage_binary'] = [1 if x > 100 else 0 for x in
-                                                      df['collected_percentage'].astype(float)]
+                                                      sdf['collected_percentage'].astype(float)]
+                ones_weight = (sdf[sdf['collected_percentage_binary'] == 1]).sum(1).sum()
+                zeroes_weight = len(sdf['collected_percentage_binary']) - ones_weight
+                print(ones_weight,zeroes_weight)
                 X = sdf.drop(columns=["collected_percentage", "collected_percentage_binary"])
-                clf = LogisticRegressionCV(cv=5, random_state=0).fit(X, sdf['collected_percentage_binary'])
+
+
+                w = {0: zeroes_weight, 1: ones_weight}
+
+                y = sdf['collected_percentage_binary']
+                clf = LogisticRegressionCV(cv=5, class_weight= w, scoring='roc_auc').fit(X, y)
+
+
+                print(clf.score(X, y))
+
 
                 res = clf.predict(X_to_pred)
                 if res[0] == 0:
-                    output = "The campaign will be unsuccessful :("
+                    output_logreg = "The campaign will be unsuccessful :("
                 else:
-                    output = "The campaign will be successful!!"
-                print("log reg output:", output)
+                    output_logreg = "The campaign will be successful!!"
+
+                env = Environment(loader=FileSystemLoader('./templates'))
+
+                template = env.get_template("output.html")
+
+                template_vars = {"output_cossim": output_cossim, "output_logreg": output_logreg}
+
+                return template.render(template_vars)
 
 
             except Exception as e:

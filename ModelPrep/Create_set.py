@@ -8,7 +8,7 @@ class Create_set:
         cursor = con.cursor()
         cursor.callproc('maskunion', ['public', 'TF-IDF_ml_set','idf_ml_set_complete'])
         con.commit()
-
+        print("created new ml_set table")
 
 
 

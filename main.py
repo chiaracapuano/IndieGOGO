@@ -30,19 +30,29 @@ def model(extract = False):
 
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
 
-        extractor = Extractor(engine, directory, 3000)
-        extractor.extract()
+        #extractor = Extractor(engine, directory, 3000)
+        #extractor.extract()
 
         create_set = Create_set(engine)
         create_set.maskunion()
 
 
-model()
-url = 'https://www.indiegogo.com//projects/curated-wardrobes-versatile-responsibly-made-entrepreneurship-women'
+model(extract = True)
 
-prediction = Prediction(url, engine)
-prediction.predict()
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return render_template("home.html")
+@app.route("/api/suggest")
+def Suggest():
+    q = request.args.get('q')
+    prediction = Prediction(q, engine)
+    return prediction.predict()
 
 
 
+if __name__ == "__main__":
+
+    app.run(host='0.0.0.0', port=5000, debug=True, threaded = True, use_reloader=False)
 

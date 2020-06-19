@@ -1,0 +1,11 @@
+bs4
+flask
+requests
+selenium
+wheel
+psycopg2-binary
+SQLAlchemy
+configparser
+webdriver_manager
+jinja2
+sklearn

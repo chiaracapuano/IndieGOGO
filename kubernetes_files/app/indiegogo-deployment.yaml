@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: indiegogo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: indiegogo
+  template:
+    metadata:
+      labels:
+        app: indiegogo
+    spec:
+      containers:
+        - name: indiegogo
+          image: achiaracapuano/indiegogo:flask
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: indiegogo-config

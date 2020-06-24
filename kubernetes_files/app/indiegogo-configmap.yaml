@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: indiegogo-config
+  labels:
+    app: indiegogo
+data:
+  POSTGRES_USER: "dev_postgres"
+  POSTGRES_PASS: "dasquee"
+  POSTGRES_PORT: "5432"
+  POSTGRES_HOST: "postgres"

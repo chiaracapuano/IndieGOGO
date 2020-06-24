@@ -6,6 +6,6 @@ wheel
 psycopg2-binary
 SQLAlchemy
 configparser
-webdriver_manager
+chromedriver-binary
 jinja2
 sklearn

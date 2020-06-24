@@ -4,11 +4,9 @@ from sqlalchemy import create_engine
 import configparser
 from Prediction import Prediction
 from flask import Flask, request, render_template
+import os
 
-from pyspark import SparkContext
 
-
-sc = SparkContext(appName="prediction")
 
 configParser = configparser.RawConfigParser()
 configFilePath = './login.config'
@@ -17,6 +15,13 @@ user = configParser.get('dev-postgres-config', 'user')
 password = configParser.get('dev-postgres-config', 'pwd')
 host = configParser.get('dev-postgres-config', 'host')
 port = configParser.get('dev-postgres-config', 'port')
+user = os.getenv('POSTGRES_USER')
+password = os.getenv('POSTGRES_PASS')
+host = os.getenv('POSTGRES_HOST')
+port = os.getenv('POSTGRES_PORT')
+print("Attempt to connect to PSQL at {}:{} as user '{}'".format(host, port, user))
+
+
 
 engine = create_engine(
     'postgresql+psycopg2://' + user + ':' + password + '@' + host + ':' + port + '/indiegogo_url')

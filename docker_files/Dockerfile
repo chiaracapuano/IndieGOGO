@@ -2,9 +2,6 @@ FROM achiaracapuano/nlp-python-base:nlp-3.7.6-buster
 COPY . /app
 WORKDIR /app
 RUN pip install --upgrade pip
-
-
-
 RUN pip install -r ./requirements.txt
 RUN pip install pandas
 RUN pip install requests

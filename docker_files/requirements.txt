@@ -1,11 +1,9 @@
 bs4
 flask
 requests
-selenium
 wheel
 psycopg2-binary
 SQLAlchemy
 configparser
-chromedriver-binary
 jinja2
 sklearn

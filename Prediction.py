@@ -21,9 +21,7 @@ class Prediction:
             The df is manipulated in order to:
             -label the successful campaigns (>+100% funding) with 1, the others with 0
             -oversample the dataset to take care of the disparity in data labels (more 0s than 1s)
-            -perform a 5-fold cross-validation to optimize the model parameters
-            The logistic regression model trained is then dumped into a .pickle file that will not require the model
-            to be retrained every time the user wants to perform a prediction."""
+            -perform a 5-fold cross-validation to optimize the model parameters"""
             df = pd.read_sql_query('select * from "idf_ml_set_complete"', con=self.engine)
             df = df.fillna("0")
             stopwords_list = stopwords.words('english')

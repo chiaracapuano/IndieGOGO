@@ -3,11 +3,11 @@ This repo contains the development of a Flask app, that evaluates whether a camp
 
 The home page invites the user to input an IndieGOGO ad link:
 
-<kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/home-page.png" /></kbd>
+<kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/PySpark/png-examples/home-page.png" /></kbd>
 
 A logistic regression model will determine whether the campaign will be successful or not, based on the parts of speech extracted via NLP:
 
-<kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/master/png-examples/output.png" /></kbd>
+<kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/PySpark/png-examples/output.png" /></kbd>
 
 The Python codebase is contained in the three folders of this repo:
 
@@ -15,12 +15,12 @@ The Python codebase is contained in the three folders of this repo:
 * ModelPrep
 * templates
 
-The ML model used n the **master** branch is a PySpark logistic regression pre-trained mode, while in the **TD_IDF** branch the model is a sklearn trained logistic regression model.
+The ML model used n the **PySpark** branch is a PySpark logistic regression pre-trained mode, while in the **TD_IDF** branch the model is a sklearn trained logistic regression model.
 
 #### home folder
 The Flask app corpus is contained in the file **main.py**. The app loads the previously trained ML model in the folder **PySpark-cvLR-ml_set_complete** and allows the user to enter a link to an IndieGOGO campaign web address.
 
-### Master Branch
+### PySpark Branch
 
 **Prediction.py** is called in the main, it scrapes the address in input and evaluates the parts of speech in the ad, storing them in a Counter. The Counter obtained is passed to the ML model, which computes wheter the campaign will be successful or not.
 

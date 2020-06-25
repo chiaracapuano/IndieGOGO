@@ -3,7 +3,7 @@ This repo contains the development of a Flask app, that evaluates whether a camp
 
 The app workflow is illustrated below:
 
-<kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/PySpark/png-examples/Workflow.001.png" /></kbd>
+<kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/TD_IDF/png-examples/Workflow.001.png" /></kbd>
 
 The home page invites the user to input an IndieGOGO ad link:
 

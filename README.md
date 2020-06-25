@@ -1,6 +1,10 @@
 # IndieGOGO
 This repo contains the development of a Flask app, that evaluates whether a campaign launched on the IndieGOGO website will be successful or not.
 
+The app workflow is illustrated below:
+
+<kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/PySpark/png-examples/Workflow.001.png" /></kbd>
+
 The home page invites the user to input an IndieGOGO ad link:
 
 <kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/PySpark/png-examples/home-page.png" /></kbd>

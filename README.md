@@ -1,7 +1,7 @@
 # IndieGOGO
 This repo contains the development of a Flask app, that evaluates whether a campaign launched on the IndieGOGO website will be successful or not.
 
-The app workflow is illustrated below:
+The app workflow is illustrated below, and it takes into account that there are *two prediction algorithms tested (one per Github branch)*:
 
 <kbd><img src="https://github.com/chiaracapuano/IndieGOGO/blob/TF-IDF/png-examples/Workflow.001.png" /></kbd>
 

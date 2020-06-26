@@ -42,7 +42,7 @@ class Prediction:
             temp_dict = [
                 {
                     'lower_case_span': str(),
-                    'lower_case_div': soup_text,
+                    'lower_case_div': soup_text.lower(),
                     'collected_percentage': np.NaN
                 }
             ]

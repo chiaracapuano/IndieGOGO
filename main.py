@@ -15,10 +15,7 @@ user = configParser.get('dev-postgres-config', 'user')
 password = configParser.get('dev-postgres-config', 'pwd')
 host = configParser.get('dev-postgres-config', 'host')
 port = configParser.get('dev-postgres-config', 'port')
-#user = os.getenv('POSTGRES_USER')
-#password = os.getenv('POSTGRES_PASS')
-#host = os.getenv('POSTGRES_HOST')
-#port = os.getenv('POSTGRES_PORT')
+
 print("Attempt to connect to PSQL at {}:{} as user '{}'".format(host, port, user))
 
 

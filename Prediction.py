@@ -41,7 +41,7 @@ class Prediction:
 
             temp_dict = [
                 {
-                    'lower_case_span': [],
+                    'lower_case_span': str(),
                     'lower_case_div': soup_text,
                     'collected_percentage': np.NaN
                 }
@@ -49,15 +49,10 @@ class Prediction:
 
             temp = pd.DataFrame.from_records(temp_dict)
             df = pd.concat([df, temp])
+            df = df.reset_index(drop=True)
 
-            df['lower_case_span'] = df['lower_case_span'].apply(lambda x: " ".join(x))
-            #df['lower_case_div'] = df['lower_case_div'].apply(lambda x: " ".join(x))
             tfidf_matrix = vectorizer.fit_transform(df['lower_case_span'] + " " + df['lower_case_div'])
-            df = df.dropna()
-            df['collected_percentage'] = df['collected_percentage'].str.replace(",", ".")
 
-            df['collected_percentage_binary'] = [1 if x > 100 else 0 for x in
-                                                 df['collected_percentage'].astype(float)]
 
 
             sdf = pd.DataFrame.sparse.from_spmatrix(tfidf_matrix)

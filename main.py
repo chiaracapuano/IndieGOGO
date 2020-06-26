@@ -1,10 +1,10 @@
 from ModelPrep.Create_set import Create_set
 from ModelPrep.Extractor import Extractor
+from ModelPrep.Model_training import Model_training
 from sqlalchemy import create_engine
 import configparser
 from Prediction import Prediction
 from flask import Flask, request, render_template
-import os
 
 
 
@@ -15,10 +15,10 @@ user = configParser.get('dev-postgres-config', 'user')
 password = configParser.get('dev-postgres-config', 'pwd')
 host = configParser.get('dev-postgres-config', 'host')
 port = configParser.get('dev-postgres-config', 'port')
-user = os.getenv('POSTGRES_USER')
-password = os.getenv('POSTGRES_PASS')
-host = os.getenv('POSTGRES_HOST')
-port = os.getenv('POSTGRES_PORT')
+#user = os.getenv('POSTGRES_USER')
+#password = os.getenv('POSTGRES_PASS')
+#host = os.getenv('POSTGRES_HOST')
+#port = os.getenv('POSTGRES_PORT')
 print("Attempt to connect to PSQL at {}:{} as user '{}'".format(host, port, user))
 
 
@@ -34,14 +34,18 @@ def model(extract = False):
 
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
 
-        extractor = Extractor(engine, directory, 3000)
-        extractor.extract()
+        #extractor = Extractor(engine, directory, 3000)
+        #extractor.extract()
 
-        create_set = Create_set(engine)
-        create_set.maskunion()
+        #create_set = Create_set(engine)
+        #create_set.maskunion()
+
+        model_training = Model_training(engine)
+        model_training.train()
 
 
-model(extract = False)
+
+model(extract = True)
 
 app = Flask(__name__)
 
@@ -50,6 +54,7 @@ def home():
     return render_template("home.html")
 @app.route("/api/suggest")
 def Suggest():
+
     q = request.args.get('q')
     prediction = Prediction(q, engine)
     return prediction.predict()

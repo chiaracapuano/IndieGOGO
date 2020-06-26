@@ -31,18 +31,19 @@ def model(extract = False):
 
         directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
 
-        #extractor = Extractor(engine, directory, 3000)
-        #extractor.extract()
+        extractor = Extractor(engine, directory, 3000)
+        extractor.extract()
 
-        #create_set = Create_set(engine)
-        #create_set.maskunion()
+        create_set = Create_set(engine)
+        create_set.maskunion()
 
-        model_training = Model_training(engine)
-        model_training.train()
+    model_training = Model_training(engine)
+    n_features = model_training.train()
+    return n_features
 
 
 
-model(extract = True)
+n_features = model(extract = False)
 
 app = Flask(__name__)
 
@@ -53,7 +54,7 @@ def home():
 def Suggest():
 
     q = request.args.get('q')
-    prediction = Prediction(q, engine)
+    prediction = Prediction(q, engine, n_features)
     return prediction.predict()
 
 

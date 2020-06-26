@@ -48,6 +48,8 @@ class Model_training:
 
             joblib.dump(clf, filename)
             print('Finished with training. Score:', clf.score(X, y))
+            n_features = len(X.columns)
+            return n_features
 
 
 

@@ -9,9 +9,10 @@ import joblib
 
 
 class Prediction:
-    def __init__(self, q, engine):
+    def __init__(self, q, engine, n_features):
         self.q = q
         self.engine = engine
+        self.n_features = n_features
 
     def predict(self):
 
@@ -60,7 +61,7 @@ class Prediction:
             to_pred = sdf[sdf.isnull().any(1)]
             X_to_pred = to_pred.drop(columns=["collected_percentage"])
 
-
+            X_to_pred = X_to_pred.iloc[:, : self.n_features]
             clf = joblib.load('ModelPrep/LogReg_rocauc.sav')
 
 

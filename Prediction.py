@@ -3,16 +3,18 @@ import requests
 import re
 import json
 import pandas as pd
+pd.options.mode.chained_assignment = None
 import numpy as np
 from jinja2 import Environment, FileSystemLoader
-import joblib
+from sklearn.linear_model import LogisticRegressionCV
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class Prediction:
-    def __init__(self, q, engine, n_features):
+    def __init__(self, q, engine):
         self.q = q
         self.engine = engine
-        self.n_features = n_features
 
     def predict(self):
 
@@ -23,7 +25,6 @@ class Prediction:
             -perform a 5-fold cross-validation to optimize the model parameters"""
             df = pd.read_sql_query('select * from "idf_ml_set_complete"', con=self.engine)
             df = df.fillna("0")
-            vectorizer = joblib.load('ModelPrep/vectorizer.sav')
 
             url = self.q
 
@@ -49,21 +50,33 @@ class Prediction:
             ]
 
             temp = pd.DataFrame.from_records(temp_dict)
-            df = pd.concat([df, temp])
-            df = df.reset_index(drop=True)
-
-            tfidf_matrix = vectorizer.fit_transform(df['lower_case_span'] + " " + df['lower_case_div'])
+            df_to_pred = pd.concat([df, temp])
+            df_to_pred = df_to_pred.reset_index(drop=True)
 
 
-
+            stopwords_list = stopwords.words('english')
+            vectorizer = TfidfVectorizer(analyzer='word',
+                                         ngram_range=(1, 2),
+                                         max_df=0.95,
+                                         min_df=0.05,
+                                         stop_words=stopwords_list)
+            tfidf_matrix = vectorizer.fit_transform(df_to_pred['lower_case_span'] + " " + df_to_pred['lower_case_div'])
             sdf = pd.DataFrame.sparse.from_spmatrix(tfidf_matrix)
-            sdf['collected_percentage'] = df['collected_percentage']
-            to_pred = sdf[sdf.isnull().any(1)]
-            X_to_pred = to_pred.drop(columns=["collected_percentage"])
+            sdf['collected_percentage'] = df_to_pred['collected_percentage']
 
-            X_to_pred = X_to_pred.iloc[:, : self.n_features]
-            clf = joblib.load('ModelPrep/LogReg_rocauc.sav')
+            sdf_train = sdf.dropna()
+            X_to_pred = sdf[sdf.isnull().any(1)]
 
+            sdf_train['collected_percentage'] = sdf_train['collected_percentage'].str.replace(",", ".")
+
+            sdf_train['collected_percentage_binary'] = [1 if x > 100 else 0 for x in
+                                                        sdf_train['collected_percentage'].astype(float)]
+
+            X = sdf_train.drop(columns=["collected_percentage", "collected_percentage_binary"])
+            y = sdf_train['collected_percentage_binary']
+            clf = LogisticRegressionCV(cv=5, class_weight='balanced', max_iter=2000).fit(X, y)
+
+            X_to_pred = X_to_pred.drop(columns=["collected_percentage"])
 
             res = clf.predict(X_to_pred)
             if res[0] == 0:

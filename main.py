@@ -1,6 +1,5 @@
 from ModelPrep.Create_set import Create_set
 from ModelPrep.Extractor import Extractor
-from ModelPrep.Model_training import Model_training
 from sqlalchemy import create_engine
 import configparser
 from Prediction import Prediction
@@ -37,9 +36,6 @@ def model(extract = False):
         create_set = Create_set(engine)
         create_set.maskunion()
 
-    model_training = Model_training(engine)
-    n_features = model_training.train()
-    return n_features
 
 
 
@@ -54,7 +50,7 @@ def home():
 def Suggest():
 
     q = request.args.get('q')
-    prediction = Prediction(q, engine, n_features)
+    prediction = Prediction(q, engine)
     return prediction.predict()
 
 

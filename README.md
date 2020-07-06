@@ -39,7 +39,7 @@ The main also contains a function *model* that defaults to Flase, which can be u
 
 #### ModelPrep
 
-### Master Branch
+### PySpark Branch
 
 The folder **ModelPrep** contains the classes:
 

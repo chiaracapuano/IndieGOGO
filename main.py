@@ -6,7 +6,6 @@ from Prediction import Prediction
 from flask import Flask, request, render_template
 
 
-
 configParser = configparser.RawConfigParser()
 configFilePath = './login.config'
 configParser.read(configFilePath)
@@ -15,20 +14,16 @@ password = configParser.get('dev-postgres-config', 'pwd')
 host = configParser.get('dev-postgres-config', 'host')
 port = configParser.get('dev-postgres-config', 'port')
 
-print("Attempt to connect to PSQL at {}:{} as user '{}'".format(host, port, user))
-
-
-
 engine = create_engine(
     'postgresql+psycopg2://' + user + ':' + password + '@' + host + ':' + port + '/indiegogo_url')
 
 
-def model(extract = False):
-    """If extract==True, then the files in RawFiles folder are scanned to append new data to the pre-existing feature
-    database."""
+def model_prep(extract = False):
+    """If extract==True, then the files in RawFiles/New_Files/ folder are scanned to append new data to the pre-existing
+    corpus database."""
     if extract ==True:
 
-        directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/'
+        directory = '/Users/chiara/PycharmProjects/IndieGOGO/RawFiles/New_Files/'
 
         extractor = Extractor(engine, directory, 3000)
         extractor.extract()
@@ -37,25 +32,24 @@ def model(extract = False):
         create_set.maskunion()
 
 
-
-
-n_features = model(extract = False)
+model_prep(extract = False)
 
 app = Flask(__name__)
+
 
 @app.route("/")
 def home():
     return render_template("home.html")
-@app.route("/api/suggest")
-def Suggest():
 
+
+@app.route("/api/suggest")
+def suggest():
     q = request.args.get('q')
     prediction = Prediction(q, engine)
     return prediction.predict()
 
 
-
 if __name__ == "__main__":
 
-    app.run(host='0.0.0.0', port=5000, debug=True, threaded = True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True, use_reloader=False)
 

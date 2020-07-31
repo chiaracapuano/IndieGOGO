@@ -29,7 +29,6 @@ class Extractor:
             'create table urls ( url varchar not null, category_name varchar, collected_percentage varchar)')
 
         for filename in os.listdir(directory):
-            print(filename)
             if filename.endswith(".gz"):
 
 
@@ -45,7 +44,6 @@ class Extractor:
                         if count < self.N:
                             url = 'https://www.indiegogo.com/'+elem["data"]["url"]
                             count = count + 1
-                            print(url, count)
 
                             temp_dict = [
                                     {

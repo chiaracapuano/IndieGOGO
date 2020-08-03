@@ -26,7 +26,6 @@ class Prediction:
             #Get the ad corpuses
             df = pd.read_sql_query('select * from "idf_ml_set_complete"', con=self.engine)
             df = df.fillna("0")
-
             #Get the user link to scrape+extract page json version
             url = self.q
             page = requests.get(url)

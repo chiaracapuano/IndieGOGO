@@ -18,7 +18,7 @@ engine = create_engine(
     'postgresql+psycopg2://' + user + ':' + password + '@' + host + ':' + port + '/indiegogo_url')
 
 
-def model_prep(extract = False):
+def model_prep(extract=False):
     """If extract==True, then the files in RawFiles/New_Files/ folder are scanned to append new data to the pre-existing
     corpus database."""
     if extract ==True:
@@ -32,7 +32,7 @@ def model_prep(extract = False):
         create_set.maskunion()
 
 
-model_prep(extract = False)
+model_prep(extract=False)
 
 app = Flask(__name__)
 
@@ -41,9 +41,8 @@ app = Flask(__name__)
 def home():
     return render_template("home.html")
 
-
-@app.route("/api/suggest")
-def suggest():
+@app.route("/api/predict")
+def Predict():
     q = request.args.get('q')
     prediction = Prediction(q, engine)
     return prediction.predict()

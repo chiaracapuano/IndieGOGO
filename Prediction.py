@@ -1,9 +1,9 @@
+import pandas as pd
+pd.options.mode.chained_assignment = None
 from bs4 import BeautifulSoup
 import requests
 import re
 import json
-import pandas as pd
-pd.options.mode.chained_assignment = None
 import numpy as np
 from jinja2 import Environment, FileSystemLoader
 from sklearn.linear_model import LogisticRegressionCV
@@ -17,15 +17,18 @@ class Prediction:
         self.engine = engine
 
     def predict(self):
-            """The function dumps the content of the Postgres table ml_set into a PySpark df.
+            """The function dumps the content of the Postgres table ml_set into a pandas df.
             The df is manipulated in order to:
+            -append the user input link to it to consistently evaluate the TFIDF matrix
             -label the successful campaigns (>+100% funding) with 1, the others with 0
-            -oversample the dataset to take care of the disparity in data labels (more 0s than 1s)
-            -perform a 5-fold cross-validation to optimize the model parameters"""
+
+            A logistic regression classifier is trained using the TFIDF matrix.
+            A 5-fold cross-validation is performed to optimize the model parameters."""
 
             #Get the ad corpuses
             df = pd.read_sql_query('select * from "idf_ml_set_complete"', con=self.engine)
             df = df.fillna("0")
+
             #Get the user link to scrape+extract page json version
             url = self.q
             page = requests.get(url)
